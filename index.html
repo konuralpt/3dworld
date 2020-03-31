@@ -22,6 +22,12 @@
 			// THIS IS WHERE WE ADDING OUR CANVAS
 			document.body.appendChild( renderer.domElement );
 
+			const resizeCanvas = () => {
+			    camera.aspect = window.innerWidth / window.innerHeight;
+			    camera.updateProjectionMatrix();
+			    renderer.setSize(window.innerWidth, window.innerHeight);
+			};
+
 			const createCube = (geometry, material, position) => {
 				const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
 				const {x, y, z} = position;
@@ -115,15 +121,15 @@
 		     	}
 		      }
 
-		    document.addEventListener("keydown", (event) => {
+		    window.addEventListener("keydown", (event) => {
 				pressedKeys[event.keyCode] = true;
 			}, true); 
 
-			document.addEventListener("keyup", () => {
+			window.addEventListener("keyup", () => {
 				pressedKeys[event.keyCode] = false;
 			}, true);
 
-			document.addEventListener('mousemove', function(event) {
+			window.addEventListener('mousemove', function(event) {
 			    mouseX = event.clientX;
 			    mouseY = event.clientY;
 			    if (mouseDown){
@@ -161,14 +167,14 @@
 			    }
 			}, false);
 
-			document.body.addEventListener("mousedown", function(event) {
+			window.addEventListener("mousedown", function(event) {
 			    mouseDown = true;
 			    onClickPositionX = event.clientX;
 			    onClickPositionY = event.clientY;
 			    camRotation = 0;
 
 			}, false);
-			document.body.addEventListener("mouseup", function(event) {
+			window.addEventListener("mouseup", function(event) {
 			    mouseDown = false;
 			    onClickPositionX = 0;
 			    onClickPositionY = 0;
@@ -176,6 +182,7 @@
 			    topVal = 0;
 			}, false);
 
+			window.addEventListener( 'resize', resizeCanvas, false );
 
 		    scene.add(stars);
 		    scene.add(cube);
