@@ -10,113 +10,84 @@
 	</head>
 	<body>
 		<script src="three.js"></script>
-		<script src="orbitControls.js"></script>
-		<script src="pointerLockControl.js"></script>
+<!-- 		<script src="orbitControls.js"></script>
+		<script src="pointerLockControl.js"></script> -->
 		<script type="text/javascript" src="anime.min.js"></script>
 		<script>
-			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			var cameraPositionZ = 400;
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
 
-			camera.position.set( 0,0, cameraPositionZ);
-			// camera.lookAt( 0, 0, 0 );
-
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight );
+			// THIS IS WHERE WE ADDING OUR CANVAS
 			document.body.appendChild( renderer.domElement );
 
-			var cubeGeometry = new THREE.BoxGeometry(100,100,100);
-			var cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x10425C });
-			var cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-			cubeMesh.position.set( 0, -80, 100 )
-			var edgesOfCube = new THREE.EdgesGeometry( cubeGeometry );
-			var line = new THREE.LineSegments( edgesOfCube, new THREE.LineBasicMaterial({ color: 0xF2F2F2 }));
-			cubeMesh.add(line);
+			const createCube = (geometry, material, position) => {
+				const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+				const {x, y, z} = position;
+				cubeMesh.position.set(x, y, z);
 
-			var loader = new THREE.FontLoader();
-			loader.load( 'fonts/Baloo_2_Regular.json', function ( font ) {
-				var geometry = new THREE.TextGeometry( 'This is my first cube!', {
-					font: font,
-					size: 50,
-					height: 5,
+				const edgesOfCube = new THREE.EdgesGeometry( cubeGeometry );
+				const line = new THREE.LineSegments( edgesOfCube, new THREE.LineBasicMaterial({ color: 0xF2F2F2 }));
+				cubeMesh.add(line);
+				return cubeMesh;
+			};
+
+			const createText = () => {
+				var loader = new THREE.FontLoader();
+				loader.load('fonts/Baloo_2_Regular.json', function ( font ) {
+					var geometry = new THREE.TextGeometry( 'This is my first cube!', {
+						font: font,
+						size: 2,
+						height: 0,
+					} );
+					var textMaterial = new THREE.MeshBasicMaterial( { color: 0xCDBB7A } );
+
+				    var mesh = new THREE.Mesh( geometry, textMaterial );
+				    mesh.position.set( -13, 5, -20 );
+
+				    scene.add( mesh );
 				} );
-				var textMaterial = new THREE.MeshBasicMaterial( { color: 0xCDBB7A } );
-
-			    var mesh = new THREE.Mesh( geometry, textMaterial );
-			    mesh.position.set( -300, 100, 0 );
-
-			    scene.add( mesh );
-			} );
-
-			var cameraLookAtX = 0;
-			var cameraLookAtY = 0;
-			var cameraLookingDirection = true;
-
-			const moveCubeX = (cube) => {
-				if (cameraLookingDirection) {
-					if (cube.position.x <= 250) {
-						cube.position.x += 1;
-						// camera.lookAt(cameraLookAtX++,0,0);
-					}else {
-						cameraLookingDirection = false;
-					}
-				}else{
-					if (cube.position.x >= -250) {
-						cube.position.x -= 1;
-						// camera.lookAt(cameraLookAtX--,0,0);
-
-					}else {
-						cameraLookingDirection = true;
-					}
-				}
 			};
 
-			const rotateCube = (cube) => {
-				cube.rotation.x += 0.02;
-				cube.rotation.y += 0.02;
-			};
+			const createStars = () => {
+				const starGeo = new THREE.Geometry();
+		      	for(let i=0;i<10000;i++) {
+		        	const star = new THREE.Vector3(
+		          		anime.random(-1500, 1500),
+		          		anime.random(-1500, 1500),
+		          		anime.random(-1500, 1500),
+		        	);
+		        	starGeo.vertices.push(star);
+		      	};
 
-			// var tl = anime.timeline({
-			// 	targets: camera.rotation,
-			// 	easing: 'spring(1, 80, 10, 0)',
-			// 	loop: true,
-			// 	duration: 1000,
-			// });
-			// tl.add({
-			// 	y: 0.300,
-			// })
-			// .add({
-			// 	y: -0.300,
-			// })
-			// .add({
-			// 	y: 0,
-			// })
-
-			var starGeo = new THREE.Geometry();
-		      for(let i=0;i<10000;i++) {
-		        star = new THREE.Vector3(
-		          anime.random(-1500, 1500),
-		          anime.random(-1500, 1500),
-		          // anime.random(0, 100),
-		          anime.random(-1500, 1500),
-		        );
-		        starGeo.vertices.push(star);
-		      }
-
-		      let sprite = new THREE.TextureLoader().load( 'star.png' );
-		      let starMaterial = new THREE.PointsMaterial({
+		      const sprite = new THREE.TextureLoader().load( 'star.png' );
+		      const starMaterial = new THREE.PointsMaterial({
 		        color: 0xaaaaaa,
 		        size: 2.5,
 		        map: sprite
 		      });
 
-		      stars = new THREE.Points(starGeo,starMaterial);
-		      scene.add(stars);
-		      scene.add(cubeMesh);
+		      const stars = new THREE.Points(starGeo,starMaterial);
+		      return stars;
+			};
 
-		      // document.addEventListener('mousemove', (value) => {
-		      // 	camera.lookAt(-((window.innerWidth / 2) - value.clientX), (window.innerHeight / 2) - value.clientY,0);
-		      // });
+
+			const cubeGeometry = new THREE.BoxGeometry(5,5,5);
+			const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x10425C });
+			const cube = createCube(cubeGeometry, cubeMaterial, { x: 0, y: -3, z: -20 });
+			const stars = createStars();
+
+			createText();
+
+			var cameraLookAtX = 0;
+			var cameraLookAtY = 0;
+			var cameraLookingDirection = true;
+
+			const rotateCube = (cube) => {
+				cube.rotation.x += 0.02;
+				cube.rotation.y += 0.02;
+			};
 
 			var pressedKeys = {};
 			var camRotation = 0;
@@ -124,35 +95,38 @@
 			var mouseX, mouseY;
 			var onClickPositionX, onClickPositionY;
 			var topVal = 0;
-			var camDirection = undefined;
 
-			document.addEventListener("keydown", (event) => {
+		      const moveCamera = () => {
+		      	let speed = 0.5;
+		      	if (pressedKeys[16]) {
+		      		speed = 3;
+		      	}
+		     	if (pressedKeys[87]) {
+		     		camera.translateZ(-speed);
+		     	} 
+		     	if (pressedKeys[83]){
+		     		camera.translateZ(speed);
+		     	}
+		     	if (pressedKeys[68]){
+		     		camera.translateX(speed);
+		     	}
+		     	if (pressedKeys[65]){
+		     		camera.translateX(-speed);
+		     	}
+		      }
+
+		    document.addEventListener("keydown", (event) => {
 				pressedKeys[event.keyCode] = true;
 			}, true); 
+
 			document.addEventListener("keyup", () => {
 				pressedKeys[event.keyCode] = false;
 			}, true);
-
-		      const moveCamera = () => {
-		     	if (pressedKeys[87]) {
-		     		camera.translateZ(-5);
-		     	} 
-		     	if (pressedKeys[83]){
-		     		camera.translateZ(5);
-		     	}
-		     	if (pressedKeys[68]){
-		     		camera.translateX(5);
-		     	}
-		     	if (pressedKeys[65]){
-		     		camera.translateX(-5);
-		     	}
-		      }
 
 			document.addEventListener('mousemove', function(event) {
 			    mouseX = event.clientX;
 			    mouseY = event.clientY;
 			    if (mouseDown){
-			    	// console.log(cameraLookAtX);
 			    	cameraLookAtX = (onClickPositionX - mouseX);
 			    	if (cameraLookAtX < 0){
 			    		if (cameraLookAtX <= topVal ) {
@@ -160,9 +134,9 @@
 			    		}else{
 			    			topVal = 0;
 			    			onClickPositionX = event.clientX;
-			    						    				    camRotation = 0;
+			    			camRotation = 0;
 
-			    			return; // console.log('yaz');
+			    			return;
 			    		}
 			    	}else {
 			    		if (cameraLookAtX >= topVal ) {
@@ -170,9 +144,8 @@
 			    		}else{
 			    			topVal = 0;
 			    			onClickPositionX = event.clientX;
-			    						    				    camRotation = 0;
-
-			    			return; // console.log('yaz');
+			    			camRotation = 0;
+			    			return;
 			    		}
 			    	}
 			    	camRotation = cameraLookAtX;
@@ -184,7 +157,7 @@
 			    	// camera.rotateX(cameraLookAtX / 1000);
 			    	// camera.rotateZ(0);
 			    }else {
-			    				    camRotation = 0;
+			    	camRotation = 0;
 			    }
 			}, false);
 
@@ -203,16 +176,17 @@
 			    topVal = 0;
 			}, false);
 
+
+		    scene.add(stars);
+		    scene.add(cube);
+
 			function animate(time){
 				requestAnimationFrame(animate);
-				// moveCubeX(cubeMesh);
-				rotateCube(cubeMesh);
+				rotateCube(cube);
 				moveCamera();
 				renderer.render(scene, camera);
 			};
-
-			animate();
-
+			requestAnimationFrame(animate);
 		</script>
 	</body>
 </html>
