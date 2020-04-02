@@ -64,6 +64,14 @@
 			const controls = new PointerLockControls( camera, document.body );
 			renderer.setSize(window.innerWidth, window.innerHeight);
 
+			var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+			scene.add(directionalLight);
+
+			var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+			directionalLight.position.z = 10;
+			directionalLight.position.x = 10;
+			scene.add(directionalLight);
+
 			// THIS IS WHERE WE ADDING OUR CANVAS
 			document.body.appendChild(renderer.domElement);
 
@@ -92,6 +100,7 @@
 						size: 2,
 						height: 0,
 					} );
+
 					var textMaterial = new THREE.MeshBasicMaterial( { color: 0xCDBB7A } );
 
 				    var mesh = new THREE.Mesh( geometry, textMaterial );
@@ -123,14 +132,41 @@
 		      return stars;
 			};
 
+			const createHeart = () => {
+				const shape = new THREE.Shape();
+				const x = -2.5;
+				const y = -5;
+				shape.moveTo(x + 2.5, y + 2.5);
+				shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
+				shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+				shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+				shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+				shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+				shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
 
-			const cubeGeometry = new THREE.BoxGeometry(5,5,5);
-			const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x10425C });
-			const cube = createCube(cubeGeometry, cubeMaterial, { x: 0, y: -3, z: -20 });
+				const extrudeSettings = {
+					steps: 10,  
+					depth:  2.5,  
+					bevelEnabled: true,  
+					bevelThickness: 0.10,  
+					bevelSize: 0.10,  
+					bevelSegments: 0,  
+				};
+
+				const geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+				const meshMaterial = new THREE.MeshStandardMaterial( { color: 0xFF3299 } );
+				const mesh = new THREE.Mesh( geometry, meshMaterial );
+				mesh.position.set( 0, 0, -20 );
+				return mesh;
+			};
+
+			// const cubeGeometry = new THREE.BoxGeometry(5,5,5);
+			// const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x10425C });
+			// const cube = createCube(cubeGeometry, cubeMaterial, { x: 0, y: -3, z: -20 });
 			const stars = createStars();
-
-			createText();
-
+			const heart = createHeart();
+			// createText();
+			createHeart();
 			var cameraLookAtX = 0;
 			var cameraLookAtY = 0;
 			var cameraLookingDirection = true;
@@ -147,37 +183,36 @@
 			var onClickPositionX, onClickPositionY;
 			var topVal = 0;
 
-		      const moveCamera = () => {
-		      	if (controls.isLocked) {
-		      		let speed = 0.5;
-			      	if (pressedKeys[16]) {
-			      		speed = 3;
-			      	}
-			     	if (pressedKeys[87]) {
-			     		camera.translateZ(-speed);
-			     	} 
-			     	if (pressedKeys[83]){
-			     		camera.translateZ(speed);
-			     	}
-			     	if (pressedKeys[68]){
-			     		camera.translateX(speed);
-			     	}
-			     	if (pressedKeys[65]){
-			     		camera.translateX(-speed);
-			     	}
-			     	if (pressedKeys[81]) {
-			     		camera.translateY(speed);
-			     	}
-			     	if (pressedKeys[69]) {
-			     		camera.translateY(-speed);
-			     	}
-		      	}
-		      }
+				const moveCamera = () => {
+					if (controls.isLocked) {
+						let speed = 0.5;
+						if (pressedKeys[16]) {
+							speed = 3;
+						}
+					if (pressedKeys[87]) {
+						camera.translateZ(-speed);
+					} 
+					if (pressedKeys[83]){
+						camera.translateZ(speed);
+					}
+					if (pressedKeys[68]){
+						camera.translateX(speed);
+					}
+					if (pressedKeys[65]){
+						camera.translateX(-speed);
+					}
+					if (pressedKeys[81]) {
+						camera.translateY(speed);
+					}
+					if (pressedKeys[69]) {
+						camera.translateY(-speed);
+					}
+					}
+				}
 
 		    window.addEventListener("keydown", (event) => {
-		    	console.log(event.keyCode);
-				pressedKeys[event.keyCode] = true;
-			}, true); 
+					pressedKeys[event.keyCode] = true;
+				}, true); 
 
 			window.addEventListener("keyup", () => {
 				pressedKeys[event.keyCode] = false;
@@ -238,7 +273,7 @@
 
 			window.addEventListener('resize', resizeCanvas, false);
 
-		    var blocker = document.getElementById('blocker');
+		  var blocker = document.getElementById('blocker');
 			var instructions = document.getElementById('instructions');
 
 			instructions.addEventListener( 'click', function () {
@@ -256,12 +291,12 @@
 			} );
 
 			scene.add(stars);
-		    scene.add(cube);
+		  scene.add(heart);
 			scene.add(controls.getObject());
 
 			function animate(time){
 				requestAnimationFrame(animate);
-				rotateCube(cube);
+				rotateCube(heart);
 				moveCamera();
 				renderer.render(scene, camera);
 			};
