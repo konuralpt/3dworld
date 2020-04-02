@@ -19,13 +19,13 @@
 			const controls = new PointerLockControls( camera, document.body );
 			renderer.setSize(window.innerWidth, window.innerHeight);
 
-			var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+			const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
 			scene.add(directionalLight);
 
-			var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+			const directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
 			directionalLight.position.z = 10;
 			directionalLight.position.x = 10;
-			scene.add(directionalLight);
+			scene.add(directionalLight2);
 
 			// THIS IS WHERE WE ADDING OUR CANVAS
 			document.body.appendChild(renderer.domElement);
@@ -36,7 +36,11 @@
 			    renderer.setSize(window.innerWidth, window.innerHeight);
 			};
 
-			const createCube = (geometry, material, position) => {
+			const createCube = ({
+				geometry = new THREE.BoxGeometry(5,5,5),
+				material = new THREE.MeshBasicMaterial({ color: 0x10425C }),
+				position = { x: 0, y: -3, z: -20 }
+			}) => {
 				const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
 				const {x, y, z} = position;
 				cubeMesh.position.set(x, y, z);
@@ -100,45 +104,27 @@
 				shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
 
 				const extrudeSettings = {
-					steps: 10,  
-					depth:  2.5,  
-					bevelEnabled: true,  
-					bevelThickness: 0.10,  
-					bevelSize: 0.10,  
-					bevelSegments: 0,  
+					steps: 2,
+					depth: 2,
+					bevelEnabled: true,
+					bevelThickness: 1,
+					bevelSize: 1,
+					bevelSegments: 2, 
 				};
 
 				const geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-				const meshMaterial = new THREE.MeshStandardMaterial( { color: 0xFF3299 } );
+				const meshMaterial = new THREE.MeshPhongMaterial( { color: 0xFF3299 } );
 				const mesh = new THREE.Mesh( geometry, meshMaterial );
-				mesh.position.set( 0, 0, -20 );
+				mesh.position.set( 0, 0, -30 );
 				return mesh;
 			};
 
-			// const cubeGeometry = new THREE.BoxGeometry(5,5,5);
-			// const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x10425C });
-			// const cube = createCube(cubeGeometry, cubeMaterial, { x: 0, y: -3, z: -20 });
-			const stars = createStars();
-			const heart = createHeart();
-			// createText();
-			createHeart();
-			var cameraLookAtX = 0;
-			var cameraLookAtY = 0;
-			var cameraLookingDirection = true;
-
-			const rotateCube = (cube) => {
-				cube.rotation.x += 0.02;
-				cube.rotation.y += 0.02;
+			const rotateObject = (object) => {
+				object.rotation.x += 0.02;
+				object.rotation.y += 0.02;
 			};
 
-			var pressedKeys = {};
-			var camRotation = 0;
-			var mouseDown = false;
-			var mouseX, mouseY;
-			var onClickPositionX, onClickPositionY;
-			var topVal = 0;
-
-				const moveCamera = () => {
+			const moveCamera = () => {
 					if (controls.isLocked) {
 						let speed = 0.5;
 						if (pressedKeys[16]) {
@@ -165,6 +151,7 @@
 					}
 				}
 
+			const pressedKeys = {};
 			window.addEventListener("keydown", (event) => {
 				pressedKeys[event.keyCode] = true;
 			}, true); 
@@ -173,10 +160,37 @@
 				pressedKeys[event.keyCode] = false;
 			}, true);
 
-			window.addEventListener('mousedown', () => {
-				controls.lock();
-			})
+			window.addEventListener('mousedown', () => controls.lock());
 
+			window.addEventListener('resize', resizeCanvas, false);
+
+			const stars = createStars();
+			const heart = createHeart();
+
+			scene.add(stars);
+		  scene.add(heart);
+			scene.add(controls.getObject());
+
+			function animate(time){
+				requestAnimationFrame(animate);
+				rotateObject(heart);
+				moveCamera();
+				renderer.render(scene, camera);
+			};
+			requestAnimationFrame(animate);
+		</script>
+		<script>
+
+			//#region custom mouse move functions
+
+			// var cameraLookAtX = 0;
+			// var cameraLookAtY = 0;
+			// var cameraLookingDirection = true;
+			// var camRotation = 0;
+			// var mouseDown = false;
+			// var mouseX, mouseY;
+			// var onClickPositionX, onClickPositionY;
+			// var topVal = 0;
 			// window.addEventListener('mousemove', function(event) {
 			//     mouseX = event.clientX;
 			//     mouseY = event.clientY;
@@ -229,20 +243,8 @@
 			//     camRotation = 0;
 			//     topVal = 0;
 			// }, false);
-
-			window.addEventListener('resize', resizeCanvas, false);
-
-			scene.add(stars);
-		  scene.add(heart);
-			scene.add(controls.getObject());
-
-			function animate(time){
-				requestAnimationFrame(animate);
-				rotateCube(heart);
-				moveCamera();
-				renderer.render(scene, camera);
-			};
-			requestAnimationFrame(animate);
+			// #endregion
+			
 		</script>
 	</body>
 </html>
