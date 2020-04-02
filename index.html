@@ -165,10 +165,17 @@
 			     	if (pressedKeys[65]){
 			     		camera.translateX(-speed);
 			     	}
+			     	if (pressedKeys[81]) {
+			     		camera.translateY(speed);
+			     	}
+			     	if (pressedKeys[69]) {
+			     		camera.translateY(-speed);
+			     	}
 		      	}
 		      }
 
 		    window.addEventListener("keydown", (event) => {
+		    	console.log(event.keyCode);
 				pressedKeys[event.keyCode] = true;
 			}, true); 
 
