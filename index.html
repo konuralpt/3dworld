@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>My first three.js app</title>
+		<link rel="shortcut icon" href="#">
 		<style>
 			body { margin: 0; }
 			canvas { display: block; }
@@ -29,6 +30,53 @@
 
 			// THIS IS WHERE WE ADDING OUR CANVAS
 			document.body.appendChild(renderer.domElement);
+
+			const setGradient = (geometry, axis, reverse) => {
+				const colors = [{
+					stop: 0,
+					color: new THREE.Color(0xf7b000)
+				}, {
+					stop: .25,
+					color: new THREE.Color(0xdd0080)
+				}, {
+					stop: .5,
+					color: new THREE.Color(0x622b85)
+				}, {
+					stop: .75,
+					color: new THREE.Color(0x007dae)
+				}, {
+					stop: 1,
+					color: new THREE.Color(0x77c8db)
+				}];
+				geometry.computeBoundingBox();
+
+				const bbox = geometry.boundingBox;
+				const size = new THREE.Vector3().subVectors(bbox.max, bbox.min);
+
+				const vertexIndices = ['a', 'b', 'c'];
+				const normalized = new THREE.Vector3();
+				let face, vertex, normalizedAxis = 0;
+
+				for (let c = 0; c < colors.length - 1; c++) {
+
+					const colorDiff = colors[c + 1].stop - colors[c].stop;
+
+					for (let i = 0; i < geometry.faces.length; i++) {
+						face = geometry.faces[i];
+						for (let v = 0; v < 3; v++) {
+							vertex = geometry.vertices[face[vertexIndices[v]]];
+							normalizedAxis = normalized.subVectors(vertex, bbox.min).divide(size)[axis];
+							if (reverse) {
+								normalizedAxis = 1 - normalizedAxis;
+							}
+							if (normalizedAxis >= colors[c].stop && normalizedAxis <= colors[c + 1].stop) {
+								const localNormalizedAxis = (normalizedAxis - colors[c].stop) / colorDiff;
+								face.vertexColors[v] = colors[c].color.clone().lerp(colors[c + 1].color, localNormalizedAxis);
+							}
+						}
+					}
+				}
+			};
 
 			const resizeCanvas = () => {
 			    camera.aspect = window.innerWidth / window.innerHeight;
@@ -119,6 +167,18 @@
 				return mesh;
 			};
 
+			const createTorusKnot = () => {
+				const geometry = new THREE.TorusKnotGeometry(2.5, .5, 100, 16);
+				const material = new THREE.MeshBasicMaterial({
+					vertexColors: THREE.VertexColors,
+					wireframe: true
+				});
+				var mesh = new THREE.Mesh(geometry, material);
+				mesh.position.set(0, 0, -15);
+				setGradient(geometry, 'z', true);
+				return mesh;
+			};
+
 			const rotateObject = (object) => {
 				object.rotation.x += 0.02;
 				object.rotation.y += 0.02;
@@ -152,6 +212,7 @@
 				}
 
 			const pressedKeys = {};
+
 			window.addEventListener("keydown", (event) => {
 				pressedKeys[event.keyCode] = true;
 			}, true); 
@@ -166,14 +227,15 @@
 
 			const stars = createStars();
 			const heart = createHeart();
+			const torus = createTorusKnot();
 
 			scene.add(stars);
-		  scene.add(heart);
+		  scene.add(torus);
 			scene.add(controls.getObject());
 
 			function animate(time){
 				requestAnimationFrame(animate);
-				rotateObject(heart);
+				rotateObject(torus);
 				moveCamera();
 				renderer.render(scene, camera);
 			};
