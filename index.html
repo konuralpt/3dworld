@@ -6,55 +6,10 @@
 		<style>
 			body { margin: 0; }
 			canvas { display: block; }
-			#blocker {
-				position: absolute;
-				width: 100%;
-				height: 100%;
-				background-color: rgba(0,0,0,0.5);
-			}
-
-			#instructions {
-				width: 100%;
-				height: 100%;
-
-				display: -webkit-box;
-				display: -moz-box;
-				display: box;
-
-				-webkit-box-orient: horizontal;
-				-moz-box-orient: horizontal;
-				box-orient: horizontal;
-
-				-webkit-box-pack: center;
-				-moz-box-pack: center;
-				box-pack: center;
-
-				-webkit-box-align: center;
-				-moz-box-align: center;
-				box-align: center;
-
-				color: #ffffff;
-				text-align: center;
-				font-family: Arial;
-				font-size: 14px;
-				line-height: 24px;
-
-				cursor: pointer;
-			}
 		</style>
 	</head>
 	<body>
-		<div id="blocker">
-			<div id="instructions">
-				<span style="font-size:36px">Click to float!</span>
-				<br /><br />
-				Move: W-A-S-D<br/>
-				Look: MOUSE
-			</div>
-
-		</div>
 		<script src="three.js"></script>
-		<script src="orbitControls.js"></script>
 		<script type="text/javascript" src="anime.min.js"></script>
 		<script type="module">
 			import { PointerLockControls } from './PointerLockControls.js';
@@ -210,13 +165,17 @@
 					}
 				}
 
-		    window.addEventListener("keydown", (event) => {
-					pressedKeys[event.keyCode] = true;
-				}, true); 
+			window.addEventListener("keydown", (event) => {
+				pressedKeys[event.keyCode] = true;
+			}, true); 
 
 			window.addEventListener("keyup", () => {
 				pressedKeys[event.keyCode] = false;
 			}, true);
+
+			window.addEventListener('mousedown', () => {
+				controls.lock();
+			})
 
 			// window.addEventListener('mousemove', function(event) {
 			//     mouseX = event.clientX;
@@ -272,23 +231,6 @@
 			// }, false);
 
 			window.addEventListener('resize', resizeCanvas, false);
-
-		  var blocker = document.getElementById('blocker');
-			var instructions = document.getElementById('instructions');
-
-			instructions.addEventListener( 'click', function () {
-				controls.lock();
-			}, false );
-
-			controls.addEventListener( 'lock', function () {
-				instructions.style.display = 'none';
-				blocker.style.display = 'none';
-			} );
-
-			controls.addEventListener( 'unlock', function () {
-				blocker.style.display = 'block';
-				instructions.style.display = '';
-			} );
 
 			scene.add(stars);
 		  scene.add(heart);
