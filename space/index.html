@@ -10,11 +10,11 @@
 		</style>
 	</head>
 	<body>
-		<script src="three.js"></script>
-		<script type="text/javascript" src="anime.min.js"></script>
+		<script type="text/javascript" src="/anime.min.js"></script>
 		<script type="module">
-			import { PointerLockControls } from './PointerLockControls.js';
-			import { GLTFLoader } from './GLTFLoader.js';
+			import * as THREE from '/three.module.js';
+			import { PointerLockControls } from '/pointerLockControls.js';
+			import { GLTFLoader } from '/gltfLoader.js';
 			const scene = new THREE.Scene();
 			// scene.background = new THREE.Color( 0x4E9AB9 );
 			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -130,7 +130,7 @@
 		        	starGeo.vertices.push(star);
 		      	};
 
-		      const sprite = new THREE.TextureLoader().load( 'star.png' );
+		      const sprite = new THREE.TextureLoader().load( '/space/star.png' );
 		      const starMaterial = new THREE.PointsMaterial({
 		        color: 0xaaaaaa,
 		        size: 2.5,
