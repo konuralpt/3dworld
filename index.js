@@ -15,6 +15,6 @@ app.get('/space',function(req,res) {
   res.sendFile(path.join(__dirname+'/space/index.html'));
 });
 
-var port = 8000; // you can use any port
+var port = process.env.PORT || 8000; // you can use any port
 app.listen(port);
 console.log('server on' + port);
