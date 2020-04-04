@@ -72,6 +72,7 @@
 			import * as THREE from '/three.module.js';
 			import { OrbitControls } from '/orbitControls.js';
 			import { GLTFLoader } from '/gltf.js';
+			import { DRACOLoader } from '/dracoLoader.js';
 
 			const scene = new THREE.Scene();
 			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -140,12 +141,16 @@
 			const loadRL = () => {
 				const manager = getLoadingManager(document.getElementById('loadingSpinner'));
 				const loader = new GLTFLoader(manager);
+				const dracoLoader = new DRACOLoader();
 
-				loader.load( '/rocketLeague/RLModel/RL.gltf', function ( gltf ) {
+				dracoLoader.setDecoderPath( '/draco/' )
+				loader.setDRACOLoader( dracoLoader );
+
+				loader.load( '/rocketLeague/RLModel/RL.glb', function ( gltf ) {
 					scene.add( gltf.scene );
 				}, undefined, function ( error ) {
 					console.error( error );
-				} );
+				});
 			};
 			
 			// createPlane();
