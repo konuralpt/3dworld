@@ -7,9 +7,67 @@
 		<style>
 			body { margin: 0; background: radial-gradient(circle at center, white 0, grey 25%, black 100%) }
 			canvas { display: block; }
+			.lds-ellipsis {
+				display: inline-block;
+				position: relative;
+				width: 80px;
+				height: 80px;
+			}
+			.lds-ellipsis div {
+				position: absolute;
+				top: 33px;
+				width: 13px;
+				height: 13px;
+				border-radius: 50%;
+				background: rgba(0,0,0,0.8);
+				animation-timing-function: cubic-bezier(0, 1, 1, 0);
+			}
+			.lds-ellipsis div:nth-child(1) {
+				left: 8px;
+				animation: lds-ellipsis1 0.6s infinite;
+			}
+			.lds-ellipsis div:nth-child(2) {
+				left: 8px;
+				animation: lds-ellipsis2 0.6s infinite;
+			}
+			.lds-ellipsis div:nth-child(3) {
+				left: 32px;
+				animation: lds-ellipsis2 0.6s infinite;
+			}
+			.lds-ellipsis div:nth-child(4) {
+				left: 56px;
+				animation: lds-ellipsis3 0.6s infinite;
+			}
+			@keyframes lds-ellipsis1 {
+				0% {
+					transform: scale(0);
+				}
+				100% {
+					transform: scale(1);
+				}
+			}
+			@keyframes lds-ellipsis3 {
+				0% {
+					transform: scale(1);
+				}
+				100% {
+					transform: scale(0);
+				}
+			}
+			@keyframes lds-ellipsis2 {
+				0% {
+					transform: translate(0, 0);
+				}
+				100% {
+					transform: translate(24px, 0);
+				}
+			}
 		</style>
 	</head>
 	<body>
+		<div id="loadingSpinner" style="position: absolute;top: 45%;left: 49%;">
+			<div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+		</div>
 		<script type="module">
 			import * as THREE from '/three.module.js';
 			import { OrbitControls } from '/orbitControls.js';
@@ -21,6 +79,9 @@
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			renderer.setSize(window.innerWidth, window.innerHeight);
 
+			// THIS IS WHERE WE ADDING OUR CANVAS
+			document.body.appendChild(renderer.domElement);
+
 			const controls = new OrbitControls( camera, renderer.domElement );
 			controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
 			controls.dampingFactor = 0.05;
@@ -28,6 +89,23 @@
 			controls.minDistance = 3;
 			controls.maxDistance = 7;
 
+			const getLoadingManager = (loadingSpinner) => {
+				var manager = new THREE.LoadingManager();
+				// manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+				// 	loadingSpinner.style.display = "block";
+				// };
+				manager.onLoad = function ( ) {
+					loadingSpinner.style.display = "none";
+				};
+				// manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+				// 	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+				// };
+				// manager.onError = function ( url ) {
+				// 	console.log( 'There was an error loading ' + url );
+				// };
+				return manager;
+			};
+			
 			const setLights = () => {
 				const directionalLight = new THREE.DirectionalLight( 0xffffff, 5 );
 				directionalLight.position.y = 10;
@@ -43,10 +121,6 @@
 				directionalLight3.position.y = -5;
 				scene.add(directionalLight3);
 			};
-
-			// THIS IS WHERE WE ADDING OUR CANVAS
-			document.body.appendChild(renderer.domElement);
-
 
 			const resizeCanvas = () => {
 			    camera.aspect = window.innerWidth / window.innerHeight;
@@ -64,7 +138,8 @@
 			}
 			
 			const loadRL = () => {
-				var loader = new GLTFLoader();
+				const manager = getLoadingManager(document.getElementById('loadingSpinner'));
+				const loader = new GLTFLoader(manager);
 
 				loader.load( '/rocketLeague/RLModel/RL.gltf', function ( gltf ) {
 					scene.add( gltf.scene );
