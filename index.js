@@ -15,6 +15,10 @@ app.get('/space',function(req,res) {
   res.sendFile(path.join(__dirname+'/space/index.html'));
 });
 
+app.get('/snow',function(req,res) {
+  res.sendFile(path.join(__dirname+'/snow/index.html'));
+});
+
 var port = process.env.PORT || 8000; // you can use any port
 app.listen(port);
 console.log('server on' + port);

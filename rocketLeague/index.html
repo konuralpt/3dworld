@@ -79,7 +79,6 @@
 			const renderer = new THREE.WebGLRenderer({ alpha: true } );
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			renderer.setSize(window.innerWidth, window.innerHeight);
-
 			// THIS IS WHERE WE ADDING OUR CANVAS
 			document.body.appendChild(renderer.domElement);
 
@@ -147,12 +146,13 @@
 				loader.setDRACOLoader( dracoLoader );
 
 				loader.load( '/rocketLeague/RLModel/RL.glb', function ( gltf ) {
+					gltf.matrixAutoUpdate  = false;
 					scene.add( gltf.scene );
 				}, undefined, function ( error ) {
 					console.error( error );
 				});
 			};
-			
+
 			// createPlane();
 			setLights();
 			loadRL();
