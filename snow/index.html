@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>My first three.js app</title>
+		<title>Snow</title>
 		<link rel="shortcut icon" href="#">
 		<style>
 			body { margin: 0; }
@@ -23,18 +23,7 @@
 			var lon = 0, lat = 0;
 			var phi = 0, theta = 0;
 
-			var textureLoader = new THREE.TextureLoader();
-
-			textureLoader.load( '/snow/snow.jpg', function ( texture ) {
-
-				texture.mapping = THREE.UVMapping;
-
-				init( texture );
-				animate();
-
-			} );
-
-			function init( texture ) {
+			function init() {
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -55,6 +44,27 @@
 				scene.background = new THREE.CubeTextureLoader()
 					.setPath( '/snow/' )
 					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
+
+
+				// audio
+
+
+
+				var audioListener = new THREE.AudioListener();
+				var audio = new THREE.Audio( audioListener );
+				new THREE.AudioLoader().load('/snow/snow.mp3', function ( audioBuffer ) {
+						audio.setBuffer(audioBuffer);
+						audioListener.position.z = 1;
+						scene.add(audio);
+						scene.add(audioListener);
+							var mouseClick = () => {
+								audio.play();
+								window.removeEventListener('click', mouseClick, false );
+							};
+							window.addEventListener("click", mouseClick, false);
+
+					},
+				);
 
 				//
 
@@ -93,7 +103,7 @@
 				window.addEventListener( 'resize', onWindowResized, false );
 
 			}
-
+			
 			function onWindowResized() {
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -198,6 +208,9 @@
 				renderer.render( scene, camera );
 
 			}
+			
+			init();
+			animate();
 
 		</script>
 	</body>

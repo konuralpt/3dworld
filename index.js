@@ -4,7 +4,7 @@ const path = require('path');
 app.use(express.static(__dirname)); //__dir and not _dir
 
 app.get('/',function(req,res) {
-  res.sendFile(path.join(__dirname+'/rocketLeague/index.html'));
+  res.sendFile(path.join(__dirname+'/snow/index.html'));
 });
 
 app.get('/rl',function(req,res) {
