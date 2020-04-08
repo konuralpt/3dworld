@@ -54,7 +54,7 @@
 			function init2() {
 				container = document.querySelector( '.container' );
 
-				camera = new THREE.PerspectiveCamera( 35, container.clientWidth / container.clientHeight, 0.1, 10 );
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera.position.set( 2, 4, 7 );
 
 				initRight();
@@ -117,16 +117,7 @@
 				sceneR.background = new THREE.CubeTextureLoader()
 					.setPath( '/snoutumn/snowForest/' )
 					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
-				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
 
-
-				var options = {
-					generateMipmaps: true,
-					minFilter: THREE.LinearMipmapLinearFilter,
-					magFilter: THREE.LinearFilter
-				};
-
-				// scene.background = new THREE.WebGLCubeRenderTarget( 1024, options ).fromEquirectangularTexture( renderer, texture );
 				sceneR.background = new THREE.CubeTextureLoader()
 					.setPath( '/snoutumn/snowForest/' )
 					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
@@ -184,11 +175,6 @@
 			function initLeft() {
 				sceneL = new THREE.Scene();
 				sceneL.background = new THREE.CubeTextureLoader()
-					.setPath( '/snoutumn/snowForest/' )
-					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
-				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-
-				sceneL.background = new THREE.CubeTextureLoader()
 					.setPath( '/snoutumn/autumnForest/' )
 					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
 
@@ -216,7 +202,6 @@
 				torus2 = new THREE.Mesh( new THREE.TorusKnotBufferGeometry( 10, 5, 100, 25 ), material2 );
 				sceneL.add( torus2 );
 			}
-
 
 
 			function onWindowResize() {
@@ -327,14 +312,15 @@
 
 				} else {
 
+					cubeCamera2R.update( renderer, sceneR );
+					material.envMap = cubeCamera2R.renderTarget.texture;
+
 					cubeCamera2L.update( renderer, sceneL );
 					material2.envMap = cubeCamera2L.renderTarget.texture;
 
 				}
 
 				count ++;
-
-				renderer.render( sceneR, camera );
 
 				renderer.setScissor( 0, 0, sliderPos, window.innerHeight );
 				renderer.render( sceneL, camera );
