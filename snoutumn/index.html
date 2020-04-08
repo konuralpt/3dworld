@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Snow</title>
+		<link rel="shortcut icon" href="#">
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+			.container {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			}
+
+			.slider {
+				position: absolute;
+				cursor: ew-resize;
+
+				width: 40px;
+				height: 40px;
+				background-color: #2196F3;
+				opacity: 0.7;
+				border-radius: 50%;
+
+				top: calc(50% - 20px);
+				left: calc(50% - 20px);
+
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="slider"></div>
+		</div>
+		<script type="module">
+			import * as THREE from '/three.module.js';
+
+			var camera, sceneL, sceneR, renderer, container;
+			var cube, sphere, torus, material;
+			var cube2, sphere2, torus2, material2;
+
+			var sliderPos = window.innerWidth / 2;
+			var sliderMoved = false;
+
+			var count = 0, cubeCamera1R, cubeCamera2R,cubeCamera1L, cubeCamera2L;
+
+			var onPointerDownPointerX, onPointerDownPointerY, onPointerDownLon, onPointerDownLat;
+
+			var lon = 0, lat = 0;
+			var phi = 0, theta = 0;
+
+
+			function init2() {
+				container = document.querySelector( '.container' );
+
+				camera = new THREE.PerspectiveCamera( 35, container.clientWidth / container.clientHeight, 0.1, 10 );
+				camera.position.set( 2, 4, 7 );
+
+				initRight();
+				initLeft();
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setSize( container.clientWidth, container.clientHeight );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setScissorTest( true );
+
+				container.appendChild( renderer.domElement );
+
+				initComparisons();
+
+			}
+
+			function initComparisons() {
+				var slider = document.querySelector( '.slider' );
+				var clicked = false;
+
+				function slideReady(e) {
+					clicked = true;
+					onDocumentMouseDown(e);
+				}
+
+				function slideFinish() {
+					clicked = false;
+				}
+
+				function slideMove( e ) {
+					if ( ! clicked ) return false;
+					sliderMoved = true;
+					sliderPos = e.pageX || e.touches[ 0 ].pageX;
+
+					//prevent the slider from being positioned outside the window bounds
+					if ( sliderPos < 0 ) sliderPos = 0;
+					if ( sliderPos > window.innerWidth ) sliderPos = window.innerWidth;
+
+					slider.style.left = sliderPos - ( slider.offsetWidth / 2 ) + "px";
+				}
+
+				slider.addEventListener( 'mousedown', slideReady );
+				slider.addEventListener( 'touchstart', slideReady );
+
+				window.addEventListener( 'mouseup', slideFinish );
+				window.addEventListener( 'touchend', slideFinish );
+
+				window.addEventListener( 'mousemove', slideMove );
+				window.addEventListener( 'touchmove', slideMove );
+
+				window.addEventListener( 'resize', onWindowResize );
+
+				document.addEventListener( 'wheel', onDocumentMouseWheel, false );
+
+			};
+
+			function initRight() {
+
+				sceneR = new THREE.Scene();
+				sceneR.background = new THREE.CubeTextureLoader()
+					.setPath( '/snoutumn/snowForest/' )
+					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+
+
+				var options = {
+					generateMipmaps: true,
+					minFilter: THREE.LinearMipmapLinearFilter,
+					magFilter: THREE.LinearFilter
+				};
+
+				// scene.background = new THREE.WebGLCubeRenderTarget( 1024, options ).fromEquirectangularTexture( renderer, texture );
+				sceneR.background = new THREE.CubeTextureLoader()
+					.setPath( '/snoutumn/snowForest/' )
+					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
+
+
+				// audio
+
+
+
+				var audioListener = new THREE.AudioListener();
+				var audio = new THREE.Audio( audioListener );
+				new THREE.AudioLoader().load('/snoutumn/snow.mp3', function ( audioBuffer ) {
+						audio.setBuffer(audioBuffer);
+						audioListener.position.z = 1;
+						sceneR.add(audio);
+						sceneR.add(audioListener);
+							// var mouseClick = () => {
+							// 	audio.play();
+							// 	window.removeEventListener('click', mouseClick, false );
+							// };
+							// window.addEventListener("click", mouseClick, false);
+
+					},
+				);
+
+				//
+
+				cubeCamera1R = new THREE.CubeCamera( 1, 1000, 256 );
+				cubeCamera1R.renderTarget.texture.generateMipmaps = true;
+				cubeCamera1R.renderTarget.texture.minFilter = THREE.LinearMipmapLinearFilter;
+				sceneR.add( cubeCamera1R );
+
+				cubeCamera2R = new THREE.CubeCamera( 1, 1000, 256 );
+				cubeCamera2R.renderTarget.texture.generateMipmaps = true;
+				cubeCamera2R.renderTarget.texture.minFilter = THREE.LinearMipmapLinearFilter;
+				sceneR.add( cubeCamera2R );
+
+				//
+
+				material = new THREE.MeshBasicMaterial( {
+					envMap: cubeCamera2R.renderTarget.texture
+				} );
+
+				sphere = new THREE.Mesh( new THREE.IcosahedronBufferGeometry( 20, 3 ), material );
+				sceneR.add( sphere );
+
+				cube = new THREE.Mesh( new THREE.BoxBufferGeometry( 20, 20, 20 ), material );
+				sceneR.add( cube );
+
+				torus = new THREE.Mesh( new THREE.TorusKnotBufferGeometry( 10, 5, 100, 25 ), material );
+				sceneR.add( torus );
+
+			}
+			
+			function initLeft() {
+				sceneL = new THREE.Scene();
+				sceneL.background = new THREE.CubeTextureLoader()
+					.setPath( '/snoutumn/snowForest/' )
+					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
+				// camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+
+				sceneL.background = new THREE.CubeTextureLoader()
+					.setPath( '/snoutumn/autumnForest/' )
+					.load( ['r0_0.jpg', 'l0_0.jpg', 'u0_0.jpg', 'd0_0.jpg', 'f0_0.jpg', 'b0_0.jpg' ] );
+
+				cubeCamera1L = new THREE.CubeCamera( 1, 1000, 256 );
+				cubeCamera1L.renderTarget.texture.generateMipmaps = true;
+				cubeCamera1L.renderTarget.texture.minFilter = THREE.LinearMipmapLinearFilter;
+				sceneR.add( cubeCamera1L );
+
+				cubeCamera2L = new THREE.CubeCamera( 1, 1000, 256 );
+				cubeCamera2L.renderTarget.texture.generateMipmaps = true;
+				cubeCamera2L.renderTarget.texture.minFilter = THREE.LinearMipmapLinearFilter;
+				sceneR.add( cubeCamera2L );
+
+
+				material2 = new THREE.MeshBasicMaterial( {
+					envMap: cubeCamera2L.renderTarget.texture
+				} );
+
+				sphere2 = new THREE.Mesh( new THREE.IcosahedronBufferGeometry( 20, 3 ), material2 );
+				sceneL.add( sphere2 );
+
+				cube2 = new THREE.Mesh( new THREE.BoxBufferGeometry( 20, 20, 20 ), material2 );
+				sceneL.add( cube2 );
+
+				torus2 = new THREE.Mesh( new THREE.TorusKnotBufferGeometry( 10, 5, 100, 25 ), material2 );
+				sceneL.add( torus2 );
+			}
+
+
+
+			function onWindowResize() {
+				camera.aspect = container.clientWidth / container.clientHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( container.clientWidth, container.clientHeight );
+
+				if ( ! sliderMoved ) sliderPos = window.innerWidth / 2;
+			}
+
+			function onDocumentMouseDown( event ) {
+
+				event.preventDefault();
+
+				onPointerDownPointerX = event.clientX;
+				onPointerDownPointerY = event.clientY;
+
+				onPointerDownLon = lon;
+				onPointerDownLat = lat;
+
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+
+			}
+
+			function onDocumentMouseMove( event ) {
+
+				lon = ( event.clientX - onPointerDownPointerX ) * 0.1 + onPointerDownLon;
+				lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+
+			}
+
+			function onDocumentMouseUp() {
+
+				document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+
+			}
+
+			function onDocumentMouseWheel( event ) {
+
+				var fov = camera.fov + event.deltaY * 0.05;
+
+				camera.fov = THREE.MathUtils.clamp( fov, 10, 75 );
+
+				camera.updateProjectionMatrix();
+
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+			}
+			
+			function render() {
+				var time = Date.now();
+
+				lon += .15;
+
+				lat = Math.max( - 85, Math.min( 85, lat ) );
+				phi = THREE.MathUtils.degToRad( 90 - lat );
+				theta = THREE.MathUtils.degToRad( lon );
+
+				cube.position.x = Math.cos( time * 0.001 ) * 30;
+				cube.position.y = Math.sin( time * 0.001 ) * 30;
+				cube.position.z = Math.sin( time * 0.001 ) * 30;
+
+				cube.rotation.x += 0.02;
+				cube.rotation.y += 0.03;
+
+				torus.position.x = Math.cos( time * 0.001 + 10 ) * 30;
+				torus.position.y = Math.sin( time * 0.001 + 10 ) * 30;
+				torus.position.z = Math.sin( time * 0.001 + 10 ) * 30;
+
+				torus.rotation.x += 0.02;
+				torus.rotation.y += 0.03;
+
+				cube2.position.x = Math.cos( time * 0.001 ) * 30;
+				cube2.position.y = Math.sin( time * 0.001 ) * 30;
+				cube2.position.z = Math.sin( time * 0.001 ) * 30;
+
+				cube2.rotation.x += 0.02;
+				cube2.rotation.y += 0.03;
+
+				torus2.position.x = Math.cos( time * 0.001 + 10 ) * 30;
+				torus2.position.y = Math.sin( time * 0.001 + 10 ) * 30;
+				torus2.position.z = Math.sin( time * 0.001 + 10 ) * 30;
+
+				torus2.rotation.x += 0.02;
+				torus2.rotation.y += 0.03;
+
+				camera.position.x = 100 * Math.sin( phi ) * Math.cos( theta );
+				camera.position.y = 100 * Math.cos( phi );
+				camera.position.z = 100 * Math.sin( phi ) * Math.sin( theta );
+
+				camera.lookAt( sceneR.position );
+
+				// pingpong
+
+				if ( count % 2 === 0 ) {
+
+					cubeCamera1R.update( renderer, sceneR );
+					material.envMap = cubeCamera1R.renderTarget.texture;
+
+					cubeCamera1L.update( renderer, sceneL );
+					material2.envMap = cubeCamera1L.renderTarget.texture;
+
+				} else {
+
+					cubeCamera2L.update( renderer, sceneL );
+					material2.envMap = cubeCamera2L.renderTarget.texture;
+
+				}
+
+				count ++;
+
+				renderer.render( sceneR, camera );
+
+				renderer.setScissor( 0, 0, sliderPos, window.innerHeight );
+				renderer.render( sceneL, camera );
+
+				renderer.setScissor( sliderPos, 0, window.innerWidth, window.innerHeight );
+				renderer.render( sceneR, camera );
+			}
+			init2();
+			animate();
+
+		</script>
+	</body>
+</html>

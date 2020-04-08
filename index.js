@@ -4,7 +4,7 @@ const path = require('path');
 app.use(express.static(__dirname)); //__dir and not _dir
 
 app.get('/',function(req,res) {
-  res.sendFile(path.join(__dirname+'/snow/index.html'));
+  res.sendFile(path.join(__dirname+'/snoutumn/index.html'));
 });
 
 app.get('/rl',function(req,res) {
@@ -15,8 +15,8 @@ app.get('/space',function(req,res) {
   res.sendFile(path.join(__dirname+'/space/index.html'));
 });
 
-app.get('/snow',function(req,res) {
-  res.sendFile(path.join(__dirname+'/snow/index.html'));
+app.get('/snoutumn',function(req,res) {
+  res.sendFile(path.join(__dirname+'/snoutumn/index.html'));
 });
 
 var port = process.env.PORT || 8000; // you can use any port
